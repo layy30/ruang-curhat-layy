@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#fff4f0">
+  <title>Ruang Curhat — Cerita aja, aku dengerin</title>
+  <style>
+    :root{--pink:#f4a9b8;--pink2:#ffe1e7;--ink:#493b43;--muted:#8b7b83;--cream:#fff9f5;--white:#fff}
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;background:linear-gradient(145deg,#fff7f2,#fff0f4);color:var(--ink);min-height:100vh;display:flex;justify-content:center;padding:22px 14px}
+    .app{width:min(100%,720px);display:flex;flex-direction:column;min-height:calc(100vh - 44px);background:rgba(255,255,255,.82);border:1px solid #f5dce2;border-radius:26px;box-shadow:0 16px 45px #8d586015;overflow:hidden}
+    header{text-align:center;padding:26px 20px 18px;background:linear-gradient(120deg,#ffe8e8,#fff3e9)}
+    .heart{font-size:30px}.eyebrow{font-size:12px;letter-spacing:2px;text-transform:uppercase;color:#a77d89;font-weight:700;margin:7px 0}
+    h1{font-size:clamp(26px,6vw,36px);margin:4px 0;color:#654b57}
+    header p{margin:7px 0 0;color:#8d747e;font-size:14px}
+    .privacy{margin:14px auto 0;display:inline-block;background:#fff9;padding:7px 12px;border-radius:30px;font-size:12px;color:#927681}
+    .chat{padding:22px 18px;display:flex;flex-direction:column;gap:14px;flex:1;overflow:auto;min-height:300px}
+    .bubble{max-width:86%;padding:13px 16px;border-radius:18px;line-height:1.5;font-size:15px;white-space:pre-wrap;overflow-wrap:anywhere}
+    .bot{background:#fff0f2;border:1px solid #f8dce2;align-self:flex-start;border-bottom-left-radius:5px}
+    .user{background:#f8d5dc;align-self:flex-end;border-bottom-right-radius:5px}
+    .tag{font-size:11px;color:#a17f89;margin-bottom:4px;font-weight:700}
+    .composer{padding:14px;border-top:1px solid #f4e4e7;background:#fffaf8}
+    .hint{font-size:12px;color:#9b8990;text-align:center;margin:0 0 10px}
+    form{display:flex;gap:9px}
+    textarea{flex:1;resize:none;min-height:48px;max-height:120px;border:1px solid #ead5db;border-radius:16px;padding:13px 14px;font:inherit;color:var(--ink);outline:none;background:white}
+    textarea:focus{border-color:#e89bab;box-shadow:0 0 0 3px #f9e4e9}
+    button{border:0;border-radius:15px;background:#df91a3;color:white;padding:0 19px;font-weight:700;font-size:14px;cursor:pointer}
+    button:disabled{opacity:.55;cursor:wait}
+    .footer{text-align:center;font-size:11px;color:#aa989e;padding:0 15px 15px}
+    @media(max-width:420px){body{padding:0}.app{min-height:100vh;border-radius:0}.chat{padding:18px 13px}.bubble{max-width:92%}}
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header>
+      <div class="heart">💗</div>
+      <div class="eyebrow">tempat aman untuk bercerita</div>
+      <h1>Ruang Curhat</h1>
+      <p>Pelan-pelan aja, kamu nggak harus memendam semuanya sendiri.</p>
+      <div class="privacy">🌷 Cerita dengan nyaman, tanpa dihakimi</div>
+    </header>
+    <section class="chat" id="chat" aria-live="polite">
+      <div class="bubble bot"><div class="tag">TEMAN CERITAMU</div>Haii, selamat datang di Ruang Curhat! 💗<br><br>Aku siap mendengarkan. Lagi ada apa? Cerita aja pelan-pelan, ya. 😊</div>
+    </section>
+    <section class="composer">
+      <p class="hint">Ketik apa yang sedang kamu rasakan…</p>
+      <form id="form">
+        <textarea id="message" rows="1" placeholder="Tulis ceritamu di sini..." aria-label="Tulis curhatmu"></textarea>
+        <button id="send" type="submit">Kirim</button>
+      </form>
+    </section>
+    <div class="footer">Kamu berharga. Terima kasih sudah mau bercerita. 💕</div>
+  </main>
+<script>
+const chat = document.getElementById('chat');
+const form = document.getElementById('form');
+const input = document.getElementById('message');
+const send = document.getElementById('send');
+
+function addBubble(text, who) {
+  const bubble = document.createElement('div');
+  bubble.className = 'bubble ' + who;
+  if (who === 'bot') {
+    const tag = document.createElement('div');
+    tag.className = 'tag';
+    tag.textContent = 'TEMAN CERITAMU';
+    bubble.appendChild(tag);
+  }
+  const content = document.createElement('span');
+  content.textContent = text;
+  bubble.appendChild(content);
+  chat.appendChild(bubble);
+  chat.scrollTop = chat.scrollHeight;
+}
+function replyTo(message) {
+  const m = message.toLowerCase();
+  if (/sedih|nangis|kecewa|down|galau/.test(m)) return 'Aduh, pasti rasanya nggak mudah ya. 🥺 Makasih sudah mau cerita. Mau cerita apa yang bikin kamu merasa seperti itu? Aku dengerin.';
+  if (/capek|lelah|疲/.test(m)) return 'Kedengarannya kamu lagi banyak menghadapi hal, ya. Istirahat sebentar juga nggak apa-apa. Apa yang paling menguras pikiranmu akhir-akhir ini?';
+  if (/marah|kesal|emosi/.test(m)) return 'Wajar kalau kamu merasa kesal saat ada sesuatu yang mengganggu. Coba ceritakan apa yang terjadi, aku akan mendengarkan tanpa menghakimi.';
+  if (/sendiri|kesepian/.test(m)) return 'Merasa sendirian itu berat. Terima kasih sudah datang dan cerita di sini. Apa yang membuatmu merasa kesepian belakangan ini?';
+  if (/terima kasih|makasih/.test(m)) return 'Sama-sama yaa. 💗 Kamu boleh cerita kapan pun kamu ingin menuangkan isi hati.';
+  return 'Aku dengerin kok. 💗 Bisa ceritakan sedikit lagi tentang itu? Apa bagian yang paling membuatmu kepikiran saat ini?';
+}
+form.addEventListener('submit', (e) => {
+  e.preventDefault();
+  const value = input.value.trim();
+  if (!value) return;
+  addBubble(value, 'user');
+  input.value = '';
+  send.disabled = true;
+  setTimeout(() => {
+    addBubble(replyTo(value), 'bot');
+    send.disabled = false;
+    input.focus();
+  }, 550);
+});
+input.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' && !e.shiftKey && window.innerWidth > 520) {
+    e.preventDefault();
+    form.requestSubmit();
+  }
+});
+</script>
+</body>
+</html>
